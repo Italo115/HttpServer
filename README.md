@@ -1,5 +1,4 @@
-["Build Your Own HTTP server" Challenge](https://app.codecrafters.io/courses/http-server/overview).
-
+[![progress-banner](https://backend.codecrafters.io/progress/http-server/7d3e8b94-83a3-445f-8a90-c6936c72cb9f)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
 # HTTP Server with Gzip Compression Support
 
 ## Overview
