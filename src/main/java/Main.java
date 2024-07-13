@@ -20,13 +20,13 @@ public class Main {
         String[] HttpRequest = line.split(" ", 0);
         OutputStream output = clientSocket.getOutputStream();
 
-        if (HttpRequest[1].equals("/")) {
+        if (HttpRequest[1].equals("/"))
             output.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
-        }
-        else if (HttpRequest[1].startsWith("/echo/")) {
+
+        else if (HttpRequest[1].startsWith("/echo/"))
             clientSocket.getOutputStream().write(String.format("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s",
                     HttpRequest[1].substring(6).length(), HttpRequest[1].substring(6)).getBytes());
-        }
+
             else if (HttpRequest[1].equals("/user-agent")) {
             reader.readLine();
             String useragent = reader.readLine().split("\\s+")[1];
@@ -35,9 +35,9 @@ public class Main {
                     useragent.length(), useragent);
             output.write(reply.getBytes());
         }
-        else {
+        else
             output.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
-        }
+
         System.out.println("accepted new connection");
     } catch (IOException e) {
         System.out.println("IOException: " + e.getMessage());
