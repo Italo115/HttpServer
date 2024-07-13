@@ -30,8 +30,7 @@ public class Main {
             else if (HttPRequest[1].equals("user-agent"))
         {
             reader.readLine();
-            output.write(String.format("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %s\r\n\r\n%s\r\n"
-                    , reader.readLine().split("\\s+")[1].length(), reader.readLine().split("\\s+")[1]).getBytes());
+            output.write(String.format("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %s\r\n\r\n%s\r\n", reader.readLine().split("\\s+")[1].length(), reader.readLine().split("\\s+")[1]).getBytes());
         }
         else {
             output.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
