@@ -30,6 +30,7 @@ public class Main {
         }
             else if (HttPRequest[1].equals("/user-agent"))
         {
+            reader.readLine();
             System.out.println("PrintStatement hereeee : "+ HttPRequest[1]);
 
             output.write(String.format("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %s\r\n\r\n%s\r\n", reader.readLine().split("\\s+")[1].length(), reader.readLine().split("\\s+")[1]).getBytes());
