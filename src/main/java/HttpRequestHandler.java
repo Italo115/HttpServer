@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
 public class HttpRequestHandler implements Runnable {
     private final Socket clientSocket;
@@ -56,7 +57,7 @@ public class HttpRequestHandler implements Runnable {
         while (!(header = bufferedReader.readLine()).isEmpty()) {
             String[] keyVal = header.split(":", 2);
             if (keyVal.length == 2) {
-                headers.put(keyVal[0], keyVal[1].trim());
+                headers.put(keyVal[0].trim(), keyVal[1].trim());
             }
         }
         return headers;
@@ -87,30 +88,55 @@ public class HttpRequestHandler implements Runnable {
     }
 
     private void handleGetRequest(String requestTarget, Map<String, String> headers, OutputStream outputStream) throws IOException {
+        boolean acceptGzip = headers.containsKey("Accept-Encoding") && headers.get("Accept-Encoding").contains("gzip");
+
         if (requestTarget.equals("/")) {
             sendResponse(outputStream, "HTTP/1.1 200 OK\r\n\r\n");
         } else if (requestTarget.startsWith("/echo/")) {
             String echoString = requestTarget.substring(6);
-            sendResponse(outputStream, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + echoString.length() + "\r\n\r\n" + echoString);
+            if (acceptGzip) {
+                sendGzipResponse(outputStream, echoString, "text/plain");
+            } else {
+                sendResponse(outputStream, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + echoString.length() + "\r\n\r\n" + echoString);
+            }
         } else if (requestTarget.equals("/user-agent")) {
             String userAgent = headers.getOrDefault("User-Agent", "");
-            sendResponse(outputStream, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + userAgent.length() + "\r\n\r\n" + userAgent);
+            if (acceptGzip) {
+                sendGzipResponse(outputStream, userAgent, "text/plain");
+            } else {
+                sendResponse(outputStream, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + userAgent.length() + "\r\n\r\n" + userAgent);
+            }
         } else if (requestTarget.startsWith("/files/")) {
-            handleFileRequest(requestTarget.substring(7), outputStream);
+            handleFileRequest(requestTarget.substring(7), outputStream, acceptGzip);
         } else {
             sendNotFound(outputStream);
         }
     }
 
-    private void handleFileRequest(String fileName, OutputStream outputStream) throws IOException {
+    private void handleFileRequest(String fileName, OutputStream outputStream, boolean acceptGzip) throws IOException {
         Path filePath = Paths.get(fileDir, fileName);
         if (Files.exists(filePath)) {
             byte[] fileBytes = Files.readAllBytes(filePath);
-            sendResponse(outputStream, "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: " + fileBytes.length + "\r\n\r\n");
-            outputStream.write(fileBytes);
+            if (acceptGzip) {
+                sendGzipResponse(outputStream, new String(fileBytes), "application/octet-stream");
+            } else {
+                sendResponse(outputStream, "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: " + fileBytes.length + "\r\n\r\n");
+                outputStream.write(fileBytes);
+            }
         } else {
             sendNotFound(outputStream);
         }
+    }
+
+    private void sendGzipResponse(OutputStream outputStream, String content, String contentType) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream)) {
+            gzipOutputStream.write(content.getBytes());
+        }
+        byte[] gzipContent = byteArrayOutputStream.toByteArray();
+        String response = "HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: " + contentType + "\r\nContent-Length: " + gzipContent.length + "\r\n\r\n";
+        outputStream.write(response.getBytes());
+        outputStream.write(gzipContent);
     }
 
     private void sendResponse(OutputStream outputStream, String response) throws IOException {
