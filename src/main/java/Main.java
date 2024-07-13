@@ -1,3 +1,4 @@
+import javax.print.DocFlavor;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -19,7 +20,7 @@ public class Main {
         System.out.println(line);
         String[] HttPRequest = line.split(" ", 0);
         OutputStream output = clientSocket.getOutputStream();
-        System.out.println("PrintStatement hereeee : "+ HttPRequest[1]);
+
         if (HttPRequest[1].equals("/")) {
             output.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
         }
@@ -27,9 +28,10 @@ public class Main {
             clientSocket.getOutputStream().write(String.format("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s",
                     HttPRequest[1].substring(6).length(), HttPRequest[1].substring(6)).getBytes());
         }
-            else if (HttPRequest[1].equals("user-agent"))
+            else if (HttPRequest[1].equals("/user-agent"))
         {
-
+            System.out.println("PrintStatement hereeee : "+ HttPRequest[1]);
+            reader.readLine();
             output.write(String.format("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %s\r\n\r\n%s\r\n", reader.readLine().split("\\s+")[1].length(), reader.readLine().split("\\s+")[1]).getBytes());
         }
         else {
