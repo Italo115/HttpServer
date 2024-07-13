@@ -20,21 +20,22 @@ public class Main {
         String[] HttPRequest = line.split(" ", 0);
         OutputStream output = clientSocket.getOutputStream();
 
-        if (HttPRequest[1].equals("/"))
+        if (HttPRequest[1].equals("/")) {
             output.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
-
-        else if (HttPRequest[1].startsWith("/echo/"))
+        }
+        else if (HttPRequest[1].startsWith("/echo/")) {
             clientSocket.getOutputStream().write(String.format("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s",
-            HttPRequest[1].substring(6).length(), HttPRequest[1].substring(6)).getBytes());
-        else if (HttPRequest[1].equals("user-agent"))
+                    HttPRequest[1].substring(6).length(), HttPRequest[1].substring(6)).getBytes());
+        }
+            else if (HttPRequest[1].equals("user-agent"))
         {
             reader.readLine();
             output.write(String.format("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %s\r\n\r\n%s\r\n"
                     , reader.readLine().split("\\s+")[1].length(), reader.readLine().split("\\s+")[1]).getBytes());
         }
-        else
+        else {
             output.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
-
+        }
         System.out.println("accepted new connection");
     } catch (IOException e) {
         System.out.println("IOException: " + e.getMessage());
