@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
-public class HttpRequestHandler implements Runnable {
+public class RequestHandler implements Runnable {
     private final Socket clientSocket;
     private final String fileDir;
 
-    public HttpRequestHandler(Socket clientSocket, String fileDir) {
+    public RequestHandler(Socket clientSocket, String fileDir) {
         this.clientSocket = clientSocket;
         this.fileDir = (fileDir == null) ? "" : fileDir + File.separator;
     }
@@ -88,7 +88,16 @@ public class HttpRequestHandler implements Runnable {
     }
 
     private void handleGetRequest(String requestTarget, Map<String, String> headers, OutputStream outputStream) throws IOException {
-        boolean acceptGzip = headers.containsKey("Accept-Encoding") && headers.get("Accept-Encoding").contains("gzip");
+        boolean acceptGzip = false;
+        if (headers.containsKey("Accept-Encoding")) {
+            String[] encodings = headers.get("Accept-Encoding").split(",");
+            for (String encoding : encodings) {
+                if (encoding.trim().equalsIgnoreCase("gzip")) {
+                    acceptGzip = true;
+                    break;
+                }
+            }
+        }
 
         if (requestTarget.equals("/")) {
             sendResponse(outputStream, "HTTP/1.1 200 OK\r\n\r\n");
