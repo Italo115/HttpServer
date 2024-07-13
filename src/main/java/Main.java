@@ -27,10 +27,13 @@ public class Main {
             clientSocket.getOutputStream().write(String.format("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s",
                     HttpRequest[1].substring(6).length(), HttpRequest[1].substring(6)).getBytes());
         }
-            else if (HttpRequest[1].equals("/user-agent"))
-        {
-            System.out.println(String.format("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %s\r\n\r\n%s\r\n", reader.readLine().split("\\s+")[1].length(), reader.readLine().split("\\s+")[1]));
-            output.write(String.format("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %s\r\n\r\n%s\r\n", reader.readLine().split("\\s+")[1].length(), reader.readLine().split("\\s+")[1]).getBytes());
+            else if (HttpRequest[1].equals("/user-agent")) {
+            reader.readLine();
+            String useragent = reader.readLine().split("\\s+")[1];
+            String reply = String.format(
+                    "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %s\r\n\r\n%s\r\n",
+                    useragent.length(), useragent);
+            output.write(reply.getBytes());
         }
         else {
             output.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
