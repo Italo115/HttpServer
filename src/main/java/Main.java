@@ -5,7 +5,7 @@ import java.net.Socket;
 public class Main {
     public static void main(String[] args) {
         String directory = null;
-        if ((args.length == 2) && (args[0].equalsIgnoreCase("--directory"))) {
+        if (args.length > 1 && "--directory".equalsIgnoreCase(args[0])) {
             directory = args[1];
         }
 
@@ -13,6 +13,7 @@ public class Main {
             serverSocket.setReuseAddress(true);
             while (true) {
                 Socket clientSocket = serverSocket.accept();
+                System.out.println("Accepted new connection");
                 new Thread(new HttpRequestHandler(clientSocket, directory)).start();
             }
         } catch (IOException e) {
